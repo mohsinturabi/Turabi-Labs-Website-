@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Turabi Labs — Build. Automate. Grow.</title>
+<meta name="description" content="Turabi Labs builds digital business software for restaurants, clinics, and local businesses — QR ordering, POS, kitchen dashboards, payments, and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.383.0/umd/lucide.min.js"></script>
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --bg-void:#05070D;
+  --bg-secondary:#0F172A;
+  --bg-secondary-2:#131c33;
+  --primary:#2563EB;
+  --primary-light:#60A5FA;
+  --primary-dim:#1D4ED8;
+  --amber:#F59E0B;
+  --white:#FFFFFF;
+  --ink:#0B1120;
+  --slate-500:#64748B;
+  --slate-400:#94A3B8;
+  --slate-200:#E2E8F0;
+  --border-dark: rgba(148,163,184,0.14);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:var(--white);
+  color:var(--ink);
+  overflow-x:hidden;
+}
+h1,h2,h3,h4,.display{
+  font-family:'Space Grotesk',sans-serif;
+  letter-spacing:-0.02em;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+a{color:inherit; text-decoration:none;}
+button{font-family:inherit; cursor:pointer;}
+::selection{background:var(--primary); color:#fff;}
+:focus-visible{outline:2px solid var(--primary-light); outline-offset:3px; border-radius:4px;}
+
+/* ===================== UTIL ===================== */
+.container{max-width:1240px; margin:0 auto; padding:0 24px;}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12.5px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--primary-light);
+  background:rgba(37,99,235,0.1);
+  border:1px solid rgba(37,99,235,0.25);
+  padding:7px 14px; border-radius:999px;
+}
+.eyebrow-light{ color:var(--primary); background:rgba(37,99,235,0.07); border:1px solid rgba(37,99,235,0.18); }
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-weight:600; font-size:15px; padding:13px 26px; border-radius:11px;
+  border:1px solid transparent; transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease, background .25s ease, border-color .25s ease;
+  white-space:nowrap;
+}
+.btn-primary{ background:var(--primary); color:#fff; box-shadow:0 8px 24px -8px rgba(37,99,235,0.65); }
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14px 30px -8px rgba(37,99,235,0.8); background:#1d5aeb;}
+.btn-ghost-dark{ background:rgba(255,255,255,0.04); color:#fff; border-color:rgba(255,255,255,0.16); backdrop-filter:blur(6px);}
+.btn-ghost-dark:hover{ background:rgba(255,255,255,0.09); transform:translateY(-2px);}
+.btn-ghost-light{ background:#fff; color:var(--ink); border-color:#E2E8F0; }
+.btn-ghost-light:hover{ transform:translateY(-2px); border-color:#c7d2e4; box-shadow:0 10px 24px -12px rgba(15,23,42,0.25);}
+.section{ padding:120px 0; }
+@media(max-width:768px){ .section{padding:72px 0;} }
+.section-head{ max-width:640px; margin-bottom:56px; }
+.section-head h2{ font-size:clamp(28px,4vw,42px); font-weight:700; margin:14px 0 14px; color:var(--ink);}
+.section-head p{ font-size:17px; line-height:1.65; color:var(--slate-500); }
+.section-head.center{ margin-left:auto; margin-right:auto; text-align:center; }
+
+/* reveal on scroll */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);
+  animation:revealFallback 0s linear 1.8s forwards; }
+.reveal.is-visible{ opacity:1; transform:translateY(0); }
+@keyframes revealFallback{ to{ opacity:1; transform:translateY(0); } }
+
+/* ===================== LOADER ===================== */
+#loader{
+  position:fixed; inset:0; z-index:9999; background:#05070D;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:22px;
+  transition:opacity .7s ease, visibility .7s ease;
+}
+#loader.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+.loader-mark{ width:76px; height:76px; position:relative; }
+.loader-mark svg{ width:100%; height:100%; }
+.loader-mark path{
+  fill:none; stroke:url(#loaderGrad); stroke-width:6; stroke-linecap:round;
+  stroke-dasharray:300; stroke-dashoffset:300;
+  animation:draw 1.4s cubic-bezier(.4,0,.2,1) forwards infinite;
+}
+@keyframes draw{
+  0%{ stroke-dashoffset:300; }
+  55%{ stroke-dashoffset:0; }
+  100%{ stroke-dashoffset:-300; }
+}
+.loader-word{ font-family:'Space Grotesk',sans-serif; color:#fff; font-weight:700; font-size:19px; letter-spacing:0.01em; }
+.loader-word span{ color:var(--primary-light); }
+.loader-bar{ width:160px; height:2px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.loader-bar-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--primary),var(--primary-light)); animation:loadbar 1.9s ease-in-out forwards; }
+@keyframes loadbar{ 0%{width:0%;} 100%{width:100%;} }
+
+/* ===================== NAVBAR ===================== */
+#navbar{
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  padding:18px 0; transition:background .35s ease, box-shadow .35s ease, padding .35s ease, border-color .35s ease;
+  border-bottom:1px solid transparent;
+}
+#navbar.scrolled{ background:rgba(5,7,13,0.72); backdrop-filter:blur(16px); padding:12px 0; border-color:rgba(255,255,255,0.08); box-shadow:0 8px 30px -20px rgba(0,0,0,0.6);}
+.nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.logo{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#fff; }
+.logo-badge{
+  width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--primary),#1746c9); box-shadow:0 6px 18px -6px rgba(37,99,235,0.7);
+  font-weight:800; font-size:14px; color:#fff;
+}
+.nav-links{ display:flex; align-items:center; gap:2px; }
+.nav-links a{
+  font-size:14.5px; font-weight:500; color:rgba(255,255,255,0.72); padding:9px 14px; border-radius:8px; transition:color .2s, background .2s;
+}
+.nav-links a:hover{ color:#fff; background:rgba(255,255,255,0.06); }
+.nav-actions{ display:flex; align-items:center; gap:10px; }
+.nav-login{ font-size:14.5px; font-weight:500; color:rgba(255,255,255,0.8); padding:9px 14px;}
+.nav-login:hover{ color:#fff; }
+#navToggle{ display:none; }
+@media(max-width:980px){
+  .nav-links{ display:none; }
+  #navToggle{ display:flex; }
+  .nav-cta-text{ display:none; }
+}
+
+/* ===================== HERO ===================== */
+#hero{
+  position:relative; padding-top:170px; padding-bottom:110px; overflow:hidden;
+  background:radial-gradient(ellipse 90% 60% at 50% -10%, #10204a 0%, #05070D 55%), #05070D;
+  color:#fff;
+}
+.hero-glow{ position:absolute; border-radius:50%; filter:blur(90px); opacity:.5; pointer-events:none; }
+.glow-a{ width:520px; height:520px; background:#2563EB; top:-180px; left:-140px; animation:float1 14s ease-in-out infinite; }
+.glow-b{ width:420px; height:420px; background:#1e3a8a; bottom:-160px; right:-100px; opacity:.4; animation:float2 16s ease-in-out infinite; }
+@keyframes float1{ 0%,100%{ transform:translate(0,0);} 50%{ transform:translate(40px,50px);} }
+@keyframes float2{ 0%,100%{ transform:translate(0,0);} 50%{ transform:translate(-30px,-40px);} }
+.hero-grid-bg{
+  position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 70% 60% at 50% 20%, black 40%, transparent 85%);
+}
+.hero-inner{ position:relative; z-index:2; display:grid; grid-template-columns:1.02fr 1fr; gap:40px; align-items:center; }
+@media(max-width:980px){ .hero-inner{ grid-template-columns:1fr; text-align:center; } }
+.hero-copy h1{
+  font-size:clamp(38px,5.2vw,60px); font-weight:700; line-height:1.06; margin:20px 0 22px; color:#fff;
+}
+.hero-copy h1 .grad{ background:linear-gradient(94deg,#60A5FA,#2563EB 60%,#93c5fd); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero-copy p{ font-size:18px; line-height:1.65; color:rgba(226,232,240,0.72); max-width:520px; margin-bottom:34px; }
+@media(max-width:980px){ .hero-copy p{ margin-left:auto; margin-right:auto; } }
+.hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+@media(max-width:980px){ .hero-actions{ justify-content:center; } }
+.hero-metrics{ display:flex; gap:34px; margin-top:52px; flex-wrap:wrap; }
+@media(max-width:980px){ .hero-metrics{ justify-content:center; } }
+.hero-metrics div b{ display:block; font-family:'Space Grotesk',sans-serif; font-size:26px; color:#fff; }
+.hero-metrics div span{ font-size:13px; color:rgba(226,232,240,0.55); }
+
+/* --- 3D device cluster --- */
+.scene{ perspective:1600px; height:460px; position:relative; }
+.scene-rig{
+  position:absolute; inset:0; transform-style:preserve-3d;
+  transform:rotateX(14deg) rotateY(-18deg);
+  transition:transform .25s ease-out;
+  animation:rigFloat 7s ease-in-out infinite;
+}
+@keyframes rigFloat{ 0%,100%{ transform:rotateX(14deg) rotateY(-18deg) translateY(0);} 50%{ transform:rotateX(11deg) rotateY(-15deg) translateY(-10px);} }
+.laptop{
+  position:absolute; left:6%; top:16%; width:78%; transform-style:preserve-3d;
+  transform:translateZ(0px);
+}
+.laptop-screen{
+  background:#0c1428; border:1px solid rgba(255,255,255,0.08); border-radius:12px 12px 4px 4px;
+  padding:14px; box-shadow:0 60px 80px -30px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.03);
+}
+.laptop-base{ height:12px; background:linear-gradient(180deg,#1a2540,#0c1428); border-radius:0 0 10px 10px; margin-top:-2px; }
+.dash-topbar{ display:flex; gap:6px; margin-bottom:12px; }
+.dash-dot{ width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.15); }
+.dash-card{ background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px; }
+.dash-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+.dash-num{ font-family:'Space Grotesk',sans-serif; color:#fff; font-size:14px; font-weight:700; }
+.dash-lbl{ color:rgba(226,232,240,0.4); font-size:8.5px; margin-top:2px; }
+.dash-chart{ height:70px; background:linear-gradient(180deg, rgba(37,99,235,0.28), rgba(37,99,235,0)); border-radius:6px; position:relative; overflow:hidden;}
+.dash-chart svg{ position:absolute; inset:0; }
+.phone{
+  position:absolute; right:-2%; bottom:-6%; width:112px; transform:translateZ(90px) rotateY(6deg);
+}
+.phone-body{
+  background:#0c1428; border:2px solid rgba(255,255,255,0.1); border-radius:22px; padding:8px;
+  box-shadow:0 40px 60px -20px rgba(0,0,0,0.8);
+}
+.phone-screen{ background:#0f1730; border-radius:14px; padding:10px 8px; }
+.phone-item{ display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); border-radius:6px; padding:6px 7px; margin-bottom:6px; }
+.phone-item .t{ font-size:7.5px; color:#e2e8f0; font-weight:600; }
+.phone-item .p{ font-size:7px; color:var(--primary-light); font-weight:700; }
+.qr-card{
+  position:absolute; left:-6%; bottom:2%; width:96px; background:#fff; border-radius:12px; padding:10px;
+  transform:translateZ(140px) rotateY(-10deg) rotateX(-4deg);
+  box-shadow:0 30px 50px -18px rgba(0,0,0,0.6);
+}
+.qr-card .qr{ width:100%; aspect-ratio:1; border-radius:6px; background:
+  repeating-linear-gradient(90deg,#0B1120 0 4px, transparent 4px 8px),
+  repeating-linear-gradient(0deg,#0B1120 0 4px, transparent 4px 8px);
+  background-blend-mode:multiply; background-color:#fff; }
+.qr-card .cap{ text-align:center; font-size:8px; color:#334155; font-weight:700; margin-top:6px; letter-spacing:0.04em; }
+.badge-float{
+  position:absolute; background:rgba(15,23,42,0.9); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(8px);
+  border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:8px; box-shadow:0 20px 40px -16px rgba(0,0,0,0.6);
+  transform:translateZ(160px);
+}
+.badge-float.b1{ top:6%; right:6%; animation:bob 5s ease-in-out infinite; }
+.badge-float.b2{ bottom:22%; left:2%; animation:bob 6s ease-in-out infinite 1s; }
+@keyframes bob{ 0%,100%{ transform:translateZ(160px) translateY(0);} 50%{ transform:translateZ(160px) translateY(-10px);} }
+.badge-float .ic{ width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; }
+.badge-float .txt b{ display:block; font-size:12px; color:#fff; font-family:'Space Grotesk',sans-serif; }
+.badge-float .txt span{ font-size:10px; color:rgba(226,232,240,0.55); }
+
+/* ===================== LOGO STRIP ===================== */
+.logo-strip-wrap{ background:#F8FAFC; border-top:1px solid #EEF1F6; border-bottom:1px solid #EEF1F6; padding:44px 0; }
+.logo-strip-label{ text-align:center; font-size:13px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--slate-500); margin-bottom:26px; }
+.marquee{ overflow:hidden; -webkit-mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent); mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent); }
+.marquee-track{ display:flex; gap:64px; width:max-content; animation:scroll 28s linear infinite; align-items:center; }
+@keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+.logo-item{ display:flex; align-items:center; gap:9px; color:#334155; font-weight:700; font-size:16px; opacity:.85; white-space:nowrap; }
+.logo-item i{ color:#94a3b8; }
+
+/* ===================== SOLUTIONS ===================== */
+.sol-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+@media(max-width:860px){ .sol-grid{ grid-template-columns:1fr; } }
+.sol-card{
+  position:relative; border-radius:20px; padding:32px; border:1px solid #E7EBF2; background:#fff;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .35s ease;
+  overflow:hidden;
+}
+.sol-card:hover{ transform:translateY(-6px); box-shadow:0 30px 60px -30px rgba(15,23,42,0.25); border-color:#d7e0f5; }
+.sol-card.dark{ background:var(--bg-secondary); color:#fff; border-color:#1c2947; }
+.sol-icon{ width:52px; height:52px; border-radius:13px; background:linear-gradient(135deg,var(--primary),#1746c9); display:flex; align-items:center; justify-content:center; margin-bottom:22px; box-shadow:0 10px 24px -8px rgba(37,99,235,0.55);}
+.sol-card h3{ font-size:21px; margin:0 0 10px; }
+.sol-card p{ font-size:15px; line-height:1.6; color:var(--slate-500); margin-bottom:18px; }
+.sol-card.dark p{ color:rgba(226,232,240,0.62); }
+.sol-tags{ display:flex; flex-wrap:wrap; gap:8px; }
+.sol-tag{ font-size:12.5px; font-weight:500; padding:5px 11px; border-radius:999px; background:#EEF2FB; color:#2947a3; }
+.sol-card.dark .sol-tag{ background:rgba(255,255,255,0.06); color:#cbd8f5; }
+.soon-badge{ position:absolute; top:22px; right:22px; background:rgba(245,158,11,0.14); color:var(--amber); border:1px solid rgba(245,158,11,0.35); font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:5px 10px; border-radius:999px; }
+.sol-arrow{ margin-top:22px; display:inline-flex; align-items:center; gap:6px; font-size:14.5px; font-weight:600; color:var(--primary); }
+.sol-card.dark .sol-arrow{ color:var(--primary-light); }
+
+/* ===================== FEATURES ===================== */
+.feat-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:18px; }
+@media(max-width:980px){ .feat-grid{ grid-template-columns:repeat(2,1fr);} }
+@media(max-width:520px){ .feat-grid{ grid-template-columns:1fr;} }
+.feat-card{
+  border:1px solid #E7EBF2; border-radius:16px; padding:24px 20px; background:#fff;
+  transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+.feat-card:hover{ transform:translateY(-4px); box-shadow:0 20px 40px -24px rgba(15,23,42,0.25); border-color:#d7e0f5;}
+.feat-icon{ width:40px; height:40px; border-radius:10px; background:#EEF2FB; color:var(--primary); display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+.feat-card h4{ font-size:15.5px; margin:0 0 6px; font-family:'Inter'; font-weight:600; }
+.feat-card p{ font-size:13px; color:var(--slate-500); line-height:1.55; margin:0; }
+
+/* ===================== HOW IT WORKS ===================== */
+.steps-wrap{ position:relative; }
+.steps-line{ position:absolute; top:34px; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,#dbe3f2 10%,#dbe3f2 90%,transparent); }
+@media(max-width:860px){ .steps-line{ display:none; } }
+.steps-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:32px; position:relative; }
+@media(max-width:860px){ .steps-grid{ grid-template-columns:1fr; } }
+.step{ text-align:left; }
+.step-num{
+  width:68px; height:68px; border-radius:16px; background:var(--bg-secondary); color:#fff; display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; margin-bottom:22px; position:relative; z-index:2;
+  box-shadow:0 12px 26px -12px rgba(15,23,42,0.4);
+}
+.step h4{ font-size:17px; margin:0 0 8px; }
+.step p{ font-size:14px; color:var(--slate-500); line-height:1.6; margin:0; }
+
+/* ===================== SCREENSHOTS ===================== */
+.tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:32px; }
+.tab-btn{ font-size:14px; font-weight:600; padding:10px 18px; border-radius:10px; border:1px solid #E7EBF2; background:#fff; color:var(--slate-500); transition:all .25s ease; }
+.tab-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.showcase-frame{
+  border-radius:20px; border:1px solid #E7EBF2; background:linear-gradient(180deg,#0c1428,#0a1020); padding:22px;
+  box-shadow:0 50px 90px -40px rgba(15,23,42,0.35);
+}
+.showcase-topbar{ display:flex; gap:6px; margin-bottom:18px; }
+.showcase-dot{ width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.18); }
+.showcase-body{ display:none; grid-template-columns:200px 1fr; gap:18px; min-height:340px; }
+.showcase-body.active{ display:grid; }
+@media(max-width:700px){ .showcase-body.active{ grid-template-columns:1fr; } }
+.sc-sidebar{ background:rgba(255,255,255,0.03); border-radius:12px; padding:16px 12px; display:flex; flex-direction:column; gap:4px; }
+.sc-side-item{ font-size:12.5px; color:rgba(226,232,240,0.55); padding:9px 10px; border-radius:8px; display:flex; align-items:center; gap:8px; }
+.sc-side-item.active{ background:rgba(37,99,235,0.16); color:#fff; }
+.sc-main{ background:rgba(255,255,255,0.03); border-radius:12px; padding:20px; }
+.sc-stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;}
+.sc-stat{ background:rgba(255,255,255,0.04); border-radius:9px; padding:12px; }
+.sc-stat b{ display:block; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:17px;}
+.sc-stat span{ color:rgba(226,232,240,0.45); font-size:10.5px; }
+.sc-line-chart{ height:110px; background:linear-gradient(180deg,rgba(37,99,235,0.22),transparent); border-radius:8px; margin-bottom:14px; position:relative; overflow:hidden;}
+.sc-rows{ display:flex; flex-direction:column; gap:8px; }
+.sc-row{ display:flex; justify-content:space-between; font-size:11.5px; color:rgba(226,232,240,0.6); background:rgba(255,255,255,0.03); padding:9px 11px; border-radius:8px; }
+.sc-row b{ color:#fff; }
+.sc-pill{ font-size:9.5px; padding:2px 8px; border-radius:999px; font-weight:700; }
+.pill-green{ background:rgba(34,197,94,0.16); color:#4ade80; }
+.pill-amber{ background:rgba(245,158,11,0.16); color:#fbbf24; }
+
+/* ===================== PRICING ===================== */
+.price-toggle{ display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:44px; }
+.price-toggle span{ font-size:14.5px; font-weight:600; color:var(--slate-500); }
+.price-toggle span.on{ color:var(--ink); }
+.switch{ width:46px; height:26px; background:#E2E8F0; border-radius:999px; position:relative; border:none; padding:0; }
+.switch .knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform .25s ease; }
+.switch.yearly{ background:var(--primary); }
+.switch.yearly .knob{ transform:translateX(20px); }
+.save-chip{ font-size:11.5px; font-weight:700; background:rgba(37,99,235,0.1); color:var(--primary); padding:3px 8px; border-radius:999px; }
+.price-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; align-items:stretch; }
+@media(max-width:900px){ .price-grid{ grid-template-columns:1fr !important; } }
+.price-card{ border:1px solid #E7EBF2; border-radius:20px; padding:34px 28px; background:#fff; display:flex; flex-direction:column; }
+.price-card.feat{ background:var(--bg-secondary); color:#fff; border-color:var(--bg-secondary); transform:scale(1.02); box-shadow:0 40px 70px -30px rgba(15,23,42,0.35); position:relative; }
+.price-card.feat .price-most{ position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--primary); color:#fff; font-size:11.5px; font-weight:700; padding:5px 14px; border-radius:999px; letter-spacing:0.03em;}
+.price-card h3{ font-size:19px; margin:0 0 6px; }
+.price-card .sub{ font-size:13.5px; color:var(--slate-500); margin-bottom:22px; }
+.price-card.feat .sub{ color:rgba(226,232,240,0.6); }
+.price-amt{ display:flex; align-items:flex-end; gap:6px; margin-bottom:26px; }
+.price-amt .num{ font-family:'Space Grotesk',sans-serif; font-size:42px; font-weight:700; }
+.price-amt .per{ font-size:14px; color:var(--slate-500); margin-bottom:8px; }
+.price-card.feat .per{ color:rgba(226,232,240,0.55); }
+.price-list{ list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px; flex:1; }
+.price-list li{ display:flex; align-items:flex-start; gap:10px; font-size:14.5px; color:#334155; }
+.price-card.feat .price-list li{ color:rgba(226,232,240,0.85); }
+.price-list i{ color:var(--primary); flex-shrink:0; margin-top:1px; }
+.price-card.feat .price-list i{ color:var(--primary-light); }
+.price-dual{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+.price-opt{ border:1px solid #E7EBF2; border-radius:14px; padding:16px 14px; }
+.price-card.feat .price-opt{ border-color:rgba(255,255,255,0.14); background:rgba(255,255,255,0.03); }
+.price-opt-label{ display:block; font-size:11.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--primary); margin-bottom:8px; }
+.price-card.feat .price-opt-label{ color:var(--primary-light); }
+.price-opt .price-amt{ margin-bottom:0; align-items:flex-end; }
+.price-opt .price-amt .num{ font-size:26px; }
+.price-setup{ font-size:11.5px; color:var(--slate-500); margin-top:6px; }
+.price-card.feat .price-setup{ color:rgba(226,232,240,0.55); }
+.price-note{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; font-weight:600; color:#1d7a3f; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); border-radius:10px; padding:10px 12px; margin-bottom:22px; }
+.price-note i{ width:15px; height:15px; flex-shrink:0; margin-top:1px; }
+.price-card.feat .price-note{ background:rgba(34,197,94,0.14); color:#4ade80; border-color:rgba(34,197,94,0.3); }
+
+/* ===================== TESTIMONIALS ===================== */
+.test-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+@media(max-width:900px){ .test-grid{ grid-template-columns:1fr; } }
+.test-card{ border:1px solid #E7EBF2; border-radius:18px; padding:28px; background:#fff; }
+.test-stars{ display:flex; gap:3px; color:#F59E0B; margin-bottom:16px; }
+.test-quote{ font-size:15px; line-height:1.7; color:#334155; margin-bottom:22px; }
+.test-person{ display:flex; align-items:center; gap:12px; }
+.test-avatar{ width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#1746c9); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-family:'Space Grotesk'; }
+.test-person b{ display:block; font-size:14.5px; }
+.test-person span{ font-size:12.5px; color:var(--slate-500); }
+
+/* ===================== FAQ ===================== */
+.faq-item{ border-bottom:1px solid #E7EBF2; }
+.faq-q{ width:100%; display:flex; align-items:center; justify-content:space-between; padding:22px 4px; background:none; border:none; text-align:left; font-size:16px; font-weight:600; color:var(--ink); }
+.faq-q i{ transition:transform .3s ease; color:var(--slate-500); flex-shrink:0; }
+.faq-item.open .faq-q i{ transform:rotate(45deg); color:var(--primary); }
+.faq-a{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
+.faq-a p{ padding:0 4px 22px; font-size:14.5px; line-height:1.7; color:var(--slate-500); margin:0; max-width:760px; }
+/* No-JS-safe native fallback */
+.faq-native{ border-bottom:1px solid #E7EBF2; }
+.faq-native summary{ list-style:none; cursor:pointer; padding:22px 4px; font-size:16px; font-weight:600; display:flex; align-items:center; justify-content:space-between; }
+.faq-native summary::-webkit-details-marker{ display:none; }
+.faq-native summary:after{ content:'+'; font-size:22px; color:var(--slate-500); }
+.faq-native[open] summary:after{ content:'–'; color:var(--primary); }
+.faq-native p{ padding:0 4px 22px; font-size:14.5px; line-height:1.7; color:var(--slate-500); margin:0; max-width:760px; }
+
+/* ===================== CTA ===================== */
+#cta{
+  position:relative; background:radial-gradient(ellipse 80% 100% at 50% 0%, #14224a, #05070D 70%), #05070D;
+  color:#fff; border-radius:28px; padding:72px 40px; text-align:center; overflow:hidden;
+  margin:0 24px;
+}
+#cta h2{ font-size:clamp(28px,4.4vw,44px); margin:0 0 16px; }
+#cta p{ color:rgba(226,232,240,0.68); font-size:16.5px; max-width:520px; margin:0 auto 34px; }
+.cta-actions{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+/* ===================== FOOTER ===================== */
+footer{ background:var(--bg-void); color:rgba(226,232,240,0.65); padding:80px 0 30px; margin-top:110px; }
+.foot-grid{ display:grid; grid-template-columns:1.6fr repeat(4,1fr); gap:32px; margin-bottom:60px; }
+@media(max-width:900px){ .foot-grid{ grid-template-columns:repeat(2,1fr);} }
+.foot-grid h5{ color:#fff; font-size:13.5px; margin:0 0 18px; letter-spacing:0.03em; }
+.foot-grid ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.foot-grid a{ font-size:14px; color:rgba(226,232,240,0.55); transition:color .2s; }
+.foot-grid a:hover{ color:#fff; }
+.foot-bottom{ display:flex; justify-content:space-between; align-items:center; padding-top:28px; border-top:1px solid rgba(255,255,255,0.08); flex-wrap:wrap; gap:16px; }
+.foot-social{ display:flex; gap:10px; }
+.foot-social a{ width:36px; height:36px; border-radius:9px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; }
+.foot-social a:hover{ background:rgba(255,255,255,0.1); }
+
+/* mobile menu */
+#mobileMenu{ position:fixed; inset:0; background:#05070D; z-index:600; display:flex; flex-direction:column; padding:24px; transform:translateX(100%); transition:transform .4s cubic-bezier(.2,.8,.2,1); }
+#mobileMenu.open{ transform:translateX(0); }
+#mobileMenu a{ font-size:20px; color:#fff; padding:16px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-weight:600; }
+#mobileMenu .mm-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOADER ===================== -->
+<div id="loader">
+  <div class="loader-mark">
+    <svg viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="loaderGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#60A5FA"/>
+          <stop offset="1" stop-color="#2563EB"/>
+        </linearGradient>
+      </defs>
+      <path d="M20,30 L50,20 L80,30 L80,55 C80,75 65,85 50,90 C35,85 20,75 20,55 Z"/>
+    </svg>
+  </div>
+  <div class="loader-word">TURABI <span>LABS</span></div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="#home" class="logo"><img src="assets/turabi-labs-icon.png" alt="Turabi Labs" style="width:34px;height:34px;border-radius:9px;object-fit:contain;background:#05070d;"> Turabi <span style="color:var(--primary-light)">Labs</span></a>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#solutions">Solutions</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#resources">Resources</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="https://www.turabilabs.in/dashboard/login" class="nav-login">Log in</a>
+      <a href="https://www.turabilabs.in/signup" class="btn btn-primary" style="padding:10px 20px; font-size:14px;">Get Started <i data-lucide="arrow-right" style="width:15px;height:15px;"></i></a>
+      <button id="navToggle" style="background:none;border:none;color:#fff;" aria-label="Open menu"><i data-lucide="menu"></i></button>
+    </div>
+  </div>
+</nav>
+
+<div id="mobileMenu">
+  <div class="mm-top">
+    <span class="logo" style="font-size:16px;"><img src="assets/turabi-labs-icon.png" alt="Turabi Labs" style="width:30px;height:30px;border-radius:8px;object-fit:contain;background:#05070d;"> Turabi Labs</span>
+    <button id="navClose" style="background:none;border:none;color:#fff;" aria-label="Close menu"><i data-lucide="x"></i></button>
+  </div>
+  <a href="#home">Home</a>
+  <a href="#solutions">Solutions</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#resources">Resources</a>
+  <a href="#about">About</a>
+  <a href="#contact">Contact</a>
+  <a href="https://www.turabilabs.in/dashboard/login">Log in</a>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero" aria-label="Introduction">
+  <div class="hero-glow glow-a"></div>
+  <div class="hero-glow glow-b"></div>
+  <div class="hero-grid-bg"></div>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow"><i data-lucide="sparkles" style="width:13px;height:13px;"></i> All-in-one business software</span>
+      <h1>Build Smarter<br><span class="grad">Digital Businesses.</span></h1>
+      <p>Turabi Labs gives restaurants, clinics, and local businesses the software to run ordering, payments, and operations — in one connected platform.</p>
+      <div class="hero-actions">
+        <a href="https://www.turabilabs.in/signup" class="btn btn-primary">Get Started <i data-lucide="arrow-right" style="width:16px;height:16px;"></i></a>
+        <a href="#solutions" class="btn btn-ghost-dark">Explore Solutions</a>
+      </div>
+      <div class="hero-metrics">
+        <div><b>120+</b><span>Businesses onboarded</span></div>
+        <div><b>99.9%</b><span>Platform uptime</span></div>
+        <div><b>&lt;10 min</b><span>Average setup time</span></div>
+      </div>
+    </div>
+    <div class="scene" id="scene">
+      <div class="scene-rig" id="sceneRig">
+        <div class="laptop">
+          <div class="laptop-screen">
+            <div class="dash-topbar"><span class="dash-dot"></span><span class="dash-dot"></span><span class="dash-dot"></span></div>
+            <div class="dash-grid">
+              <div class="dash-card"><div class="dash-num">128</div><div class="dash-lbl">ORDERS TODAY</div></div>
+              <div class="dash-card"><div class="dash-num">₹24.5K</div><div class="dash-lbl">REVENUE</div></div>
+              <div class="dash-card"><div class="dash-num">15</div><div class="dash-lbl">ACTIVE</div></div>
+              <div class="dash-card"><div class="dash-num">320</div><div class="dash-lbl">CUSTOMERS</div></div>
+            </div>
+            <div class="dash-chart">
+              <svg viewBox="0 0 300 70" preserveAspectRatio="none">
+                <polyline points="0,50 40,35 80,45 120,20 160,32 200,15 240,28 300,10" fill="none" stroke="#60A5FA" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="laptop-base"></div>
+        </div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="phone-screen">
+              <div class="phone-item"><span class="t">Table 12</span><span class="p">Preparing</span></div>
+              <div class="phone-item"><span class="t">Table 05</span><span class="p">Ready</span></div>
+              <div class="phone-item"><span class="t">Table 08</span><span class="p">New</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="qr-card">
+          <div class="qr"></div>
+          <div class="cap">SCAN TO ORDER</div>
+        </div>
+        <div class="badge-float b1"><span class="ic" style="background:rgba(37,99,235,0.25);"><i data-lucide="credit-card" style="width:14px;height:14px;color:#93c5fd;"></i></span><span class="txt"><b>Payment Received</b><span>₹1,398 · Razorpay</span></span></div>
+        <div class="badge-float b2"><span class="ic" style="background:rgba(34,197,94,0.2);"><i data-lucide="trending-up" style="width:14px;height:14px;color:#4ade80;"></i></span><span class="txt"><b>+18% this week</b><span>Live analytics</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LOGO STRIP ===================== -->
+<section class="logo-strip-wrap" id="resources">
+  <div class="logo-strip-label">Trusted by restaurants and clinics building on Turabi Labs</div>
+  <div class="marquee">
+    <div class="marquee-track" id="marqueeTrack">
+      <span class="logo-item"><i data-lucide="flame"></i> The Spice House</span>
+      <span class="logo-item"><i data-lucide="utensils"></i> Fork &amp; Flame</span>
+      <span class="logo-item"><i data-lucide="soup"></i> Urban Bites</span>
+      <span class="logo-item"><i data-lucide="chef-hat"></i> Masala Magic</span>
+      <span class="logo-item"><i data-lucide="store"></i> The Food Hub</span>
+      <span class="logo-item"><i data-lucide="stethoscope"></i> Wellcare Clinic</span>
+      <span class="logo-item"><i data-lucide="heart-pulse"></i> Sunrise Diagnostics</span>
+      <span class="logo-item"><i data-lucide="cross"></i> MediCare Point</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SOLUTIONS ===================== -->
+<section class="section" id="solutions">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow eyebrow-light">Our Solutions</span>
+      <h2>One platform, built for how your business actually runs</h2>
+      <p>Live products your business can use today — with a roadmap built for what's next.</p>
+    </div>
+    <div class="sol-grid">
+      <div class="sol-card reveal">
+        <div class="sol-icon" style="background:#fff;padding:4px;"><img src="assets/qr-ordering-system.png" alt="QR Ordering System" style="width:100%;height:100%;object-fit:contain;border-radius:9px;"></div>
+        <h3>Restaurant QR Ordering System</h3>
+        <p>Customers scan, browse the menu, and order from the table — orders route straight to your kitchen dashboard in real time.</p>
+        <div class="sol-tags"><span class="sol-tag">QR Menus</span><span class="sol-tag">Live Orders</span><span class="sol-tag">Table Management</span></div>
+        <span class="sol-arrow">Explore <i data-lucide="arrow-right" style="width:15px;height:15px;"></i></span>
+      </div>
+      <div class="sol-card reveal">
+        <div class="sol-icon"><i data-lucide="globe" style="color:#fff;width:24px;height:24px;"></i></div>
+        <h3>Restaurant Website &amp; Online Ordering</h3>
+        <p>A branded website and ordering page for your restaurant, with menu management, delivery details, and payments built in.</p>
+        <div class="sol-tags"><span class="sol-tag">Website Builder</span><span class="sol-tag">Online Ordering</span><span class="sol-tag">Digital Menu</span></div>
+        <span class="sol-arrow">Explore <i data-lucide="arrow-right" style="width:15px;height:15px;"></i></span>
+      </div>
+      <div class="sol-card dark reveal">
+        <span class="soon-badge">Coming Soon</span>
+        <div class="sol-icon" style="background:#fff;padding:4px;"><img src="assets/doctors-appointment-booking.png" alt="Doctor Appointment Booking" style="width:100%;height:100%;object-fit:contain;border-radius:9px;"></div>
+        <h3>Doctor Appointment Booking</h3>
+        <p>Patients search doctors, view live availability, and book appointments online — synced to a clinic dashboard.</p>
+        <div class="sol-tags"><span class="sol-tag">Booking Engine</span><span class="sol-tag">Patient Dashboard</span><span class="sol-tag">Reminders</span></div>
+      </div>
+      <div class="sol-card dark reveal">
+        <span class="soon-badge">Coming Soon</span>
+        <div class="sol-icon" style="background:#fff;padding:4px;"><img src="assets/ai-business-automation.png" alt="AI Business Automation" style="width:100%;height:100%;object-fit:contain;border-radius:9px;"></div>
+        <h3>AI Business Automation</h3>
+        <p>Automated replies, order summaries, and workflow triggers powered by AI — plus WhatsApp automation and CRM.</p>
+        <div class="sol-tags"><span class="sol-tag">AI Workflows</span><span class="sol-tag">CRM</span><span class="sol-tag">WhatsApp</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="section" style="background:#F8FAFC;" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow eyebrow-light">Platform Features</span>
+      <h2>Everything your operations team needs, in one dashboard</h2>
+      <p>Every solution is built on the same core platform — so features carry over as you grow.</p>
+    </div>
+    <div class="feat-grid" id="featGrid">
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="layout-dashboard" style="width:19px;height:19px;"></i></div><h4>Real-time Dashboard</h4><p>Live view of orders, tables, and sales as they happen.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon" style="background:#fff;padding:2px;"><img src="assets/qr-ordering-system.png" alt="QR Ordering" style="width:100%;height:100%;object-fit:contain;border-radius:5px;"></div><h4>QR Ordering</h4><p>Contactless ordering straight from the table.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="credit-card" style="width:19px;height:19px;"></i></div><h4>Payments</h4><p>Integrated payments with instant reconciliation.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="bar-chart-3" style="width:19px;height:19px;"></i></div><h4>Reports</h4><p>Daily, weekly, and monthly performance reports.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="trending-up" style="width:19px;height:19px;"></i></div><h4>Analytics</h4><p>Track top items, peak hours, and customer trends.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="users" style="width:19px;height:19px;"></i></div><h4>Staff Management</h4><p>Shifts, roles, and staff performance in one place.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="receipt" style="width:19px;height:19px;"></i></div><h4>Invoices</h4><p>Auto-generated invoices for every order.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="building-2" style="width:19px;height:19px;"></i></div><h4>Multi Tenant</h4><p>Manage multiple outlets from a single account.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="cloud" style="width:19px;height:19px;"></i></div><h4>Cloud Hosting</h4><p>Secure, always-on hosting with automatic backups.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon"><i data-lucide="shield-check" style="width:19px;height:19px;"></i></div><h4>Role Based Access</h4><p>Give staff exactly the access their role needs.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head center reveal" style="margin-left:auto;margin-right:auto;">
+      <span class="eyebrow eyebrow-light">How It Works</span>
+      <h2>From sign-up to your first order, in four steps</h2>
+      <p>A guided setup gets your business live without needing a developer.</p>
+    </div>
+    <div class="steps-wrap reveal">
+      <div class="steps-line"></div>
+      <div class="steps-grid">
+        <div class="step"><div class="step-num">01</div><h4>Choose Solution</h4><p>Pick QR ordering, a website, or the full operations suite based on what your business needs.</p></div>
+        <div class="step"><div class="step-num">02</div><h4>Set Up Business</h4><p>Add your menu, tables, staff and pricing through a guided onboarding flow.</p></div>
+        <div class="step"><div class="step-num">03</div><h4>Launch</h4><p>Go live with your QR codes, ordering page, and dashboards active immediately.</p></div>
+        <div class="step"><div class="step-num">04</div><h4>Grow</h4><p>Track performance with analytics and add new modules as your business scales.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SCREENSHOTS ===================== -->
+<section class="section" style="background:#F8FAFC;" id="product">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow eyebrow-light">Inside the Platform</span>
+      <h2>See every dashboard in the product</h2>
+      <p>One login, every view your team and your customers need.</p>
+    </div>
+    <div class="tabs reveal" id="tabRow">
+      <button class="tab-btn active" data-target="rest">Restaurant Dashboard</button>
+      <button class="tab-btn" data-target="kitchen">Kitchen Dashboard</button>
+      <button class="tab-btn" data-target="order">Customer Ordering</button>
+      <button class="tab-btn" data-target="analytics">Analytics</button>
+      <button class="tab-btn" data-target="doctor">Doctor Dashboard (Preview)</button>
+    </div>
+    <div class="showcase-frame reveal" id="showcaseFrame">
+      <div class="showcase-topbar"><span class="showcase-dot"></span><span class="showcase-dot"></span><span class="showcase-dot"></span></div>
+      <div id="showcaseBodies">
+        <div class="showcase-body active" id="sc-rest">
+          <div class="sc-sidebar"><div class="sc-side-item active"><i data-lucide="circle" style="width:6px;height:6px;"></i> Dashboard</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Orders</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Menu</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Tables</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Staff</div></div>
+          <div class="sc-main">
+            <div class="sc-stat-row"><div class="sc-stat"><b>128</b><span>ORDERS</span></div><div class="sc-stat"><b>₹24.5K</b><span>SALES</span></div><div class="sc-stat"><b>15</b><span>ACTIVE</span></div><div class="sc-stat"><b>320</b><span>CUSTOMERS</span></div></div>
+            <div class="sc-line-chart"><svg viewBox="0 0 400 110" preserveAspectRatio="none"><polyline points="0,80 50,60 100,70 150,40 200,55 250,25 300,45 350,20 400,35" fill="none" stroke="#60A5FA" stroke-width="2.5"/></svg></div>
+            <div class="sc-rows"><div class="sc-row"><span>ORD-0123 · Table 12</span><b><span class="sc-pill pill-green">₹498</span></b></div><div class="sc-row"><span>ORD-0124 · Table 05</span><b><span class="sc-pill pill-amber">₹298</span></b></div><div class="sc-row"><span>ORD-0125 · Table 08</span><b><span class="sc-pill pill-green">₹350</span></b></div></div>
+          </div>
+        </div>
+        <div class="showcase-body" id="sc-kitchen">
+          <div class="sc-sidebar"><div class="sc-side-item active"><i data-lucide="circle" style="width:6px;height:6px;"></i> Live Queue</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Preparing</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Ready</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Completed</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Settings</div></div>
+          <div class="sc-main">
+            <div class="sc-stat-row"><div class="sc-stat"><b>09</b><span>IN QUEUE</span></div><div class="sc-stat"><b>04</b><span>PREPARING</span></div><div class="sc-stat"><b>03</b><span>READY</span></div><div class="sc-stat"><b>2m</b><span>AVG TIME</span></div></div>
+            <div class="sc-line-chart"><svg viewBox="0 0 400 110" preserveAspectRatio="none"><polyline points="0,80 50,60 100,70 150,40 200,55 250,25 300,45 350,20 400,35" fill="none" stroke="#60A5FA" stroke-width="2.5"/></svg></div>
+            <div class="sc-rows"><div class="sc-row"><span>Margherita Pizza x2</span><b><span class="sc-pill pill-amber">Table 12</span></b></div><div class="sc-row"><span>Veg Burger x1</span><b><span class="sc-pill pill-green">Table 05</span></b></div><div class="sc-row"><span>Pasta Alfredo x1</span><b><span class="sc-pill pill-amber">Table 08</span></b></div></div>
+          </div>
+        </div>
+        <div class="showcase-body" id="sc-order">
+          <div class="sc-sidebar"><div class="sc-side-item active"><i data-lucide="circle" style="width:6px;height:6px;"></i> Menu</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Pizza</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Burgers</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Drinks</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Cart</div></div>
+          <div class="sc-main">
+            <div class="sc-stat-row"><div class="sc-stat"><b>₹249</b><span>MARGHERITA</span></div><div class="sc-stat"><b>₹149</b><span>VEG BURGER</span></div><div class="sc-stat"><b>₹199</b><span>ALFREDO</span></div><div class="sc-stat"><b>₹129</b><span>COLD COFFEE</span></div></div>
+            <div class="sc-line-chart"><svg viewBox="0 0 400 110" preserveAspectRatio="none"><polyline points="0,80 50,60 100,70 150,40 200,55 250,25 300,45 350,20 400,35" fill="none" stroke="#60A5FA" stroke-width="2.5"/></svg></div>
+            <div class="sc-rows"><div class="sc-row"><span>Cart total</span><b><span class="sc-pill pill-green">₹398</span></b></div><div class="sc-row"><span>Delivery</span><b><span class="sc-pill pill-green">Table 12</span></b></div><div class="sc-row"><span>Payment</span><b><span class="sc-pill pill-green">Razorpay</span></b></div></div>
+          </div>
+        </div>
+        <div class="showcase-body" id="sc-analytics">
+          <div class="sc-sidebar"><div class="sc-side-item active"><i data-lucide="circle" style="width:6px;height:6px;"></i> Overview</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Sales</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Items</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Hours</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Export</div></div>
+          <div class="sc-main">
+            <div class="sc-stat-row"><div class="sc-stat"><b>+18%</b><span>WEEKLY GROWTH</span></div><div class="sc-stat"><b>₹1.2L</b><span>MONTH REVENUE</span></div><div class="sc-stat"><b>4.8★</b><span>AVG RATING</span></div><div class="sc-stat"><b>62%</b><span>REPEAT ORDERS</span></div></div>
+            <div class="sc-line-chart"><svg viewBox="0 0 400 110" preserveAspectRatio="none"><polyline points="0,80 50,60 100,70 150,40 200,55 250,25 300,45 350,20 400,35" fill="none" stroke="#60A5FA" stroke-width="2.5"/></svg></div>
+            <div class="sc-rows"><div class="sc-row"><span>Peak hour</span><b><span class="sc-pill pill-green">7–9 PM</span></b></div><div class="sc-row"><span>Top item</span><b><span class="sc-pill pill-green">Margherita Pizza</span></b></div><div class="sc-row"><span>Slowest day</span><b><span class="sc-pill pill-amber">Tuesday</span></b></div></div>
+          </div>
+        </div>
+        <div class="showcase-body" id="sc-doctor">
+          <div class="sc-sidebar"><div class="sc-side-item active"><i data-lucide="circle" style="width:6px;height:6px;"></i> Appointments</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Patients</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Schedule</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Prescriptions</div><div class="sc-side-item"><i data-lucide="circle" style="width:6px;height:6px;"></i> Billing</div></div>
+          <div class="sc-main">
+            <div class="sc-stat-row"><div class="sc-stat"><b>24</b><span>TODAY</span></div><div class="sc-stat"><b>6</b><span>WAITING</span></div><div class="sc-stat"><b>4.9★</b><span>RATING</span></div><div class="sc-stat"><b>120</b><span>PATIENTS</span></div></div>
+            <div class="sc-line-chart"><svg viewBox="0 0 400 110" preserveAspectRatio="none"><polyline points="0,80 50,60 100,70 150,40 200,55 250,25 300,45 350,20 400,35" fill="none" stroke="#60A5FA" stroke-width="2.5"/></svg></div>
+            <div class="sc-rows"><div class="sc-row"><span>Dr. Arjun Sharma</span><b><span class="sc-pill pill-green">10:00 AM</span></b></div><div class="sc-row"><span>Dr. Priya Verma</span><b><span class="sc-pill pill-amber">11:30 AM</span></b></div><div class="sc-row"><span>Follow-up · R. Das</span><b><span class="sc-pill pill-green">02:00 PM</span></b></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-head center reveal" style="margin-left:auto;margin-right:auto;">
+      <span class="eyebrow eyebrow-light">Pricing</span>
+      <h2>Simple pricing that scales with your business</h2>
+      <p>Choose a one-time Permanent plan or a low-cost Monthly plan — whichever fits your business.</p>
+    </div>
+    <div class="price-grid reveal" style="grid-template-columns:repeat(2,1fr);">
+      <div class="price-card feat">
+        <span class="price-most">Most Popular</span>
+        <div class="sol-icon" style="margin-bottom:20px;"><i data-lucide="qr-code" style="color:#fff;width:22px;height:22px;"></i></div>
+        <h3>Restaurant QR Ordering System</h3>
+        <p class="sub">Contactless table ordering with live kitchen dashboard and payments.</p>
+        <div class="price-dual">
+          <div class="price-opt">
+            <span class="price-opt-label">Permanent</span>
+            <div class="price-amt"><span class="num">₹9,999</span><span class="per">one-time</span></div>
+          </div>
+          <div class="price-opt">
+            <span class="price-opt-label">Monthly</span>
+            <div class="price-amt"><span class="num">₹599</span><span class="per">/ month</span></div>
+          </div>
+        </div>
+        <div class="price-note"><i data-lucide="badge-check"></i> Permanent plan includes 1 year of free updates &amp; new features</div>
+        <ul class="price-list">
+          <li><i data-lucide="check"></i> QR ordering for 1 location</li>
+          <li><i data-lucide="check"></i> Digital menu &amp; QR menu</li>
+          <li><i data-lucide="check"></i> Live kitchen dashboard</li>
+          <li><i data-lucide="check"></i> Reports &amp; analytics</li>
+        </ul>
+        <a href="https://www.turabilabs.in/signup" class="btn btn-primary">Get Started</a>
+      </div>
+      <div class="price-card">
+        <div class="sol-icon" style="margin-bottom:20px;"><i data-lucide="globe" style="color:#fff;width:22px;height:22px;"></i></div>
+        <h3>Restaurant Website &amp; QR Ordering System</h3>
+        <ul class="price-list">
+          <li><i data-lucide="check"></i> Branded restaurant website</li>
+          <li><i data-lucide="check"></i> QR ordering system included</li>
+          <li><i data-lucide="check"></i> Online ordering &amp; digital menu</li>
+          <li><i data-lucide="check"></i> Delivery details &amp; payments</li>
+          <li><i data-lucide="check"></i> Reports &amp; analytics</li>
+        </ul>
+        <div class="price-dual">
+          <div class="price-opt">
+            <span class="price-opt-label">Permanent</span>
+            <div class="price-amt"><span class="num">₹18,999</span><span class="per">one-time</span></div>
+          </div>
+          <div class="price-opt">
+            <span class="price-opt-label">Monthly</span>
+            <div class="price-amt"><span class="num">₹599</span><span class="per">/ month</span></div>
+            <div class="price-setup">+ ₹10,000 one-time setup</div>
+          </div>
+        </div>
+        <div class="price-note"><i data-lucide="badge-check"></i> Permanent plan includes 1 year of free updates &amp; new features</div>
+        <ul class="price-list">
+          <li><i data-lucide="check"></i> Branded restaurant website</li>
+          <li><i data-lucide="check"></i> Online ordering &amp; digital menu</li>
+          <li><i data-lucide="check"></i> Delivery details &amp; payments</li>
+          <li><i data-lucide="check"></i> Reports &amp; analytics</li>
+        </ul>
+        <a href="https://www.turabilabs.in/signup" class="btn btn-ghost-light">Get Started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section class="section" style="background:#F8FAFC;">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow eyebrow-light">Testimonials</span>
+      <h2>Teams running their business on Turabi Labs</h2>
+      <p>Real feedback from restaurant and clinic teams using the platform daily.</p>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">Our table turnaround time dropped noticeably once orders started going straight to the kitchen screen instead of servers running back and forth.</p>
+        <div class="test-person"><span class="test-avatar">R</span><div><b>Rohan Kapoor</b><span>Owner, Fork &amp; Flame</span></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">Setup took us under fifteen minutes end to end. The QR stands were printed and on tables the same evening.</p>
+        <div class="test-person"><span class="test-avatar">A</span><div><b>Ayesha Khan</b><span>Manager, Urban Bites</span></div></div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">The analytics dashboard is the first thing I open every morning. It's the clearest picture we've ever had of daily sales.</p>
+        <div class="test-person"><span class="test-avatar">V</span><div><b>Vikram Nair</b><span>Founder, The Spice House</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="section" id="about">
+  <div class="container" style="max-width:820px;">
+    <div class="section-head center reveal" style="margin-left:auto;margin-right:auto;">
+      <span class="eyebrow eyebrow-light">FAQ</span>
+      <h2>Questions, answered</h2>
+    </div>
+    <div class="reveal">
+      <details class="faq-native" open>
+        <summary>Can I use Turabi Labs for just one restaurant location?</summary>
+        <p>Yes. The Starter plan is built for a single location, with the option to add more locations as you grow into Business or Enterprise.</p>
+      </details>
+      <details class="faq-native">
+        <summary>Do customers need to download an app to order?</summary>
+        <p>No. Customers simply scan the QR code at their table and order directly from their browser — nothing to install.</p>
+      </details>
+      <details class="faq-native">
+        <summary>How does payment settlement work?</summary>
+        <p>Payments are processed through our integrated payment gateway and settle directly to your linked bank account, with every transaction visible in your dashboard.</p>
+      </details>
+      <details class="faq-native">
+        <summary>When is the Doctor Appointment Booking system launching?</summary>
+        <p>It's currently in development as part of our clinic product line, alongside Clinic Management, CRM, and WhatsApp Automation.</p>
+      </details>
+      <details class="faq-native">
+        <summary>Can I migrate from my current POS system?</summary>
+        <p>Yes, our onboarding team helps import your existing menu, pricing, and staff data so you can switch over without losing history.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="reveal" style="margin-bottom:0;">
+  <div id="cta">
+    <div class="hero-glow glow-a" style="opacity:.35;"></div>
+    <div style="position:relative;z-index:2;">
+      <h2>Ready to digitize your business?</h2>
+      <p>Join restaurants and clinics already running on Turabi Labs. Setup takes minutes, not weeks.</p>
+      <div class="cta-actions">
+        <a href="https://www.turabilabs.in/signup" class="btn btn-primary">Get Started <i data-lucide="arrow-right" style="width:16px;height:16px;"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer id="contact">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <span class="logo" style="margin-bottom:16px;"><img src="assets/turabi-labs-icon.png" alt="Turabi Labs" style="width:34px;height:34px;border-radius:9px;object-fit:contain;background:#05070d;"> Turabi Labs</span>
+        <p style="font-size:14px; line-height:1.7; max-width:280px; margin-top:16px;">Digital business software for restaurants, clinics, and local businesses. Build, automate, and grow — from one platform.</p>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <ul><li><a href="#about">About Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Blog</a></li><li><a href="#contact">Contact</a></li></ul>
+      </div>
+      <div>
+        <h5>Products</h5>
+        <ul><li><a href="#solutions">QR Ordering</a></li><li><a href="#solutions">Website Builder</a></li><li><a href="#solutions">POS Dashboard</a></li><li><a href="#solutions">Appointment Booking</a></li></ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul><li><a href="#">Documentation</a></li><li><a href="#">Help Center</a></li><li><a href="#">API Reference</a></li><li><a href="#">Status</a></li></ul>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Security</a></li></ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span style="font-size:13.5px;">© 2026 Turabi Labs. All rights reserved.</span>
+      <div class="foot-social">
+        <a href="#" aria-label="Twitter"><i data-lucide="twitter" style="width:16px;height:16px;"></i></a>
+        <a href="#" aria-label="LinkedIn"><i data-lucide="linkedin" style="width:16px;height:16px;"></i></a>
+        <a href="#" aria-label="Instagram"><i data-lucide="instagram" style="width:16px;height:16px;"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Safe icon renderer: never let a failed/blocked CDN script kill the rest of the page */
+function renderIcons(){
+  try{ if (typeof lucide !== 'undefined') lucide.createIcons(); }catch(e){ console.warn('icon render skipped', e); }
+}
+renderIcons();
+
+/* -------- Loader (guaranteed to hide no matter what else happens) -------- */
+function hideLoader(){
+  const l = document.getElementById('loader');
+  if(l) l.classList.add('hide');
+}
+window.addEventListener('load', () => setTimeout(hideLoader, 1400));
+/* hard fallback in case 'load' never fires (blocked font/script requests, etc.) */
+setTimeout(hideLoader, 3000);
+
+/* -------- Navbar scroll state -------- */
+try{
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 24);
+});
+}catch(e){ console.warn(e); }
+
+/* -------- Mobile menu -------- */
+try{
+const mobileMenu = document.getElementById('mobileMenu');
+document.getElementById('navToggle').addEventListener('click', () => mobileMenu.classList.add('open'));
+document.getElementById('navClose').addEventListener('click', () => mobileMenu.classList.remove('open'));
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+}catch(e){ console.warn(e); }
+
+/* -------- Marquee duplicate for seamless loop -------- */
+try{
+const track = document.getElementById('marqueeTrack');
+track.innerHTML += track.innerHTML;
+}catch(e){ console.warn(e); }
+
+/* -------- 3D hero mouse parallax -------- */
+try{
+const scene = document.getElementById('scene');
+const rig = document.getElementById('sceneRig');
+scene.addEventListener('mousemove', (e) => {
+  const r = scene.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width - 0.5;
+  const y = (e.clientY - r.top) / r.height - 0.5;
+  rig.style.animation = 'none';
+  rig.style.transform = `rotateX(${14 - y * 16}deg) rotateY(${-18 + x * 20}deg)`;
+});
+scene.addEventListener('mouseleave', () => {
+  rig.style.animation = 'rigFloat 7s ease-in-out infinite';
+});
+}catch(e){ console.warn(e); }
+
+/* -------- Scroll reveal -------- */
+try{
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('is-visible'); io.unobserve(en.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+}catch(e){ console.warn(e); document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible')); }
+
+/* Features are static HTML now — no JS generation needed */
+
+/* -------- Showcase tabs (panels are static HTML; JS only switches which is visible) -------- */
+try{
+const tabRow = document.getElementById('tabRow');
+tabRow.addEventListener('click', (e) => {
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  tabRow.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.showcase-body').forEach(b => b.classList.remove('active'));
+  document.getElementById('sc-' + btn.dataset.target).classList.add('active');
+});
+}catch(e){ console.warn(e); }
+
+/* FAQ now uses native <details>/<summary> in the markup — works with zero JS */
+
+/* final safety net: whatever happened above, make sure loader is gone and content is visible */
+setTimeout(() => {
+  hideLoader();
+  document.querySelectorAll('.reveal:not(.is-visible)').forEach(el => el.classList.add('is-visible'));
+}, 3200);
+</script>
+</body>
+</html>
